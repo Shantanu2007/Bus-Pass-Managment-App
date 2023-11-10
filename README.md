@@ -1,5 +1,8 @@
 # Bus-Pass-Management-App:- Seamlessly Navigate Your Adventures with Confidence
 
+![WhatsApp Image 2023-11-10 at 17 29 13_2f770beb](https://github.com/Shantanu2007/Bus-Pass-Managment-App/assets/118951213/4e47418d-808e-45e7-9262-731da0f3ef8c)
+
+
 Embark on a seamless journey with JourneyPass, your go-to travel companion for a hassle-free and secure travel experience. Developed with precision and powered by Firebase, JourneyPass revolutionizes how you manage your travel information, making it a breeze to create, renew, and view your travel passes. This is a high-level bus pass management app where users can Create, renew, and View their bus pass. This App is beneficial for students, and professionals who are supposed to travel daily it is free and accessible for everyone as required. 
 Key Features:
 
@@ -26,6 +29,5 @@ Enjoy the convenience of a centralized hub where you can effortlessly create new
 
 Firebase-Powered Security:
 Your data's fortress is Firebase, ensuring that your sensitive information remains guarded against unauthorized access. JourneyPass prioritizes your privacy and security.
-![WhatsApp Image 2023-11-10 at 17 29 13_2f770beb](https://github.com/Shantanu2007/Bus-Pass-Managment-App/assets/118951213/4e47418d-808e-45e7-9262-731da0f3ef8c)
 ![Screenshot 2023-10-22 132724](https://github.com/Shantanu2007/Bus-Pass-Managment-App/assets/118951213/f05ae141-0680-4026-bdfa-3183d05aa713)
 
