@@ -1,0 +1,207 @@
+package com.example.buspasssystem;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class TripRegistrationActivity extends AppCompatActivity {
+
+    private Uri selectedFileUri; // To store the selected file URI
+    private String selectedCurrentLocation;
+    private String selectedDestination;
+
+    private String fullName;
+    private String dateOfBirth;
+    private String phoneNumber;
+    private String email;
+    private String address;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_trip_registration);
+
+        Intent intent = getIntent();
+        fullName = intent.getStringExtra("full_name");
+        dateOfBirth = intent.getStringExtra("date_of_birth");
+        phoneNumber = intent.getStringExtra("phone_number");
+        email = intent.getStringExtra("email");
+        address = intent.getStringExtra("address");
+
+        // Initialize UI components
+        Spinner currentStopSpinner = findViewById(R.id.currentStopSpinner);
+        Spinner destinationStopSpinner = findViewById(R.id.destinationStopSpinner);
+        RadioGroup userTypeRadioGroup = findViewById(R.id.userTypeRadioGroup);
+        Button uploadBonafideButton = findViewById(R.id.uploadBonafideButton);
+        Button uploadEmployeeCardButton = findViewById(R.id.uploadEmployeeCardButton);
+        Button uploadImageButton = findViewById(R.id.uploadImage);
+       // ImageView uploadedImageView = findViewById(R.id.uploadedImageView);
+
+        // Populate the spinner with stop options
+        ArrayAdapter<CharSequence> currentStopAdapter = ArrayAdapter.createFromResource(
+                this, R.array.current_stop_options, android.R.layout.simple_spinner_item
+        );
+        currentStopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        currentStopSpinner.setAdapter(currentStopAdapter);
+
+        ArrayAdapter<CharSequence> destinationStopAdapter = ArrayAdapter.createFromResource(
+                this, R.array.destination_stop_options, android.R.layout.simple_spinner_item
+        );
+        destinationStopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        destinationStopSpinner.setAdapter(destinationStopAdapter);
+
+        // Set up radio button change listener to toggle visibility of upload buttons
+        userTypeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+                if (checkedId == R.id.studentRadioButton) {
+                    // Student selected, show upload Bonafide button
+                    uploadBonafideButton.setVisibility(View.VISIBLE);
+                    uploadEmployeeCardButton.setVisibility(View.GONE);
+                    uploadImageButton.setVisibility(View.VISIBLE);
+                } else if (checkedId == R.id.employeeRadioButton) {
+                    // Employee selected, show upload Employee Card button
+                    uploadEmployeeCardButton.setVisibility(View.VISIBLE);
+                    uploadBonafideButton.setVisibility(View.GONE);
+                    uploadImageButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // Set up click listeners for file upload buttons
+        uploadBonafideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Launch a file picker intent
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg,image/jpg"); // Allow all file types
+                startActivityForResult(intent, 1);
+            }
+        });
+
+        uploadEmployeeCardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Launch a file picker intent
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg,image/jpg"); // Allow all file types
+                startActivityForResult(intent, 2);
+            }
+        });
+
+        uploadImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Launch a file picker intent
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg,image/jpg");
+                startActivityForResult(intent, 3);
+            }
+        });
+
+        // Set up click listeners for the "Start Payment Activity" button
+        Button startPaymentButton = findViewById(R.id.nextButton2);
+        startPaymentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedCurrentLocation == null || selectedDestination == null) {
+                    // Show an error message if either of the fields is not selected
+                    Toast.makeText(TripRegistrationActivity.this, "Please select both Current Location and Destination", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Both fields are selected, proceed to PaymentActivity
+                    startPaymentActivity(view);
+                }
+            }
+        });
+
+        // Spinner listeners to update selected values
+        currentStopSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Update the selected current location
+                selectedCurrentLocation = currentStopSpinner.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing
+            }
+        });
+
+        destinationStopSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Update the selected destination
+                selectedDestination = destinationStopSpinner.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 1 || requestCode == 2) {
+                // Bonafide certificate or Employee card selected
+                selectedFileUri = data.getData();
+                // You can perform further actions with the selected file, such as uploading it to a server.
+            } else if (requestCode == 3) {
+                // Check if the selected file is an image in JPEG or JPG format
+                if (data.getData() != null) {
+                    String mimeType = getContentResolver().getType(data.getData());
+                    if (mimeType != null && (mimeType.equals("image/jpeg") || mimeType.equals("image/jpg"))) {
+                        Uri selectedImageUri = data.getData();
+                        // Display the uploaded image in the ImageView
+                       // uploadedImageView.setImageURI(selectedImageUri);
+                       // uploadedImageView.setVisibility(View.VISIBLE);
+                        // You can use selectedImageUri to pass the image to the next activity
+                    } else {
+                        // Show an error message if the selected file is not in the expected format
+                        Toast.makeText(this, "Please select an image in JPEG or JPG format", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+    }
+
+    public void startPaymentActivity(View view) {
+        if (selectedFileUri != null) {
+            Intent intent = new Intent(this, Payment1.class);
+
+            // Pass user's details as extras in the intent
+            intent.putExtra("full_name", fullName);
+            intent.putExtra("date_of_birth", dateOfBirth);
+            intent.putExtra("phone_number", phoneNumber);
+            intent.putExtra("email", email);
+            intent.putExtra("address", address);
+
+            // Pass the selected drop-down options as extras (example code, adjust it accordingly)
+            intent.putExtra("current_location", selectedCurrentLocation);
+            intent.putExtra("destination", selectedDestination);
+
+            // Pass the selected image URI as an extra
+            intent.putExtra("selected_image_uri", selectedFileUri.toString());
+
+            startActivity(intent);
+        } else {
+            Toast.makeText(TripRegistrationActivity.this, "Image not selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
