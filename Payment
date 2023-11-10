@@ -1,0 +1,181 @@
+package com.example.buspasssystem;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.razorpay.Checkout;
+import com.razorpay.PaymentResultListener;
+
+import org.json.JSONObject;
+
+import java.util.Calendar;
+
+public class Payment1 extends AppCompatActivity implements PaymentResultListener {
+
+    Button paybtn1;
+    TextView paytext1;
+    EditText monthsInput;
+    EditText priceOutput;
+    private String fullName;
+    private String dateOfBirth;
+    private String phoneNumber;
+    private String email;
+    private String address;
+    private String currentLocation;
+    private String destinationLocation;
+
+    private Uri selectedImageUri;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_payment1);
+        Checkout.preload(getApplicationContext());
+
+        paytext1 = findViewById(R.id.paytext1);
+        paybtn1 = findViewById(R.id.paybtn1);
+        monthsInput = findViewById(R.id.monthsInput);
+        priceOutput = findViewById(R.id.priceOutput);
+
+        Intent intent = getIntent();
+        fullName = intent.getStringExtra("full_name");
+        dateOfBirth = intent.getStringExtra("date_of_birth");
+        phoneNumber = intent.getStringExtra("phone_number");
+        email = intent.getStringExtra("email");
+        address = intent.getStringExtra("address");
+        currentLocation = intent.getStringExtra("current_location");
+        destinationLocation = intent.getStringExtra("destination");
+
+        String selectedImageUriString = getIntent().getStringExtra("selected_image_uri");
+
+        if (selectedImageUriString != null) {
+            selectedImageUri = Uri.parse(selectedImageUriString);
+        } else {
+            Toast.makeText(this, "Please upload an image first", Toast.LENGTH_SHORT).show();
+        }
+
+        monthsInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String inputText = s.toString();
+                if (!inputText.isEmpty()) {
+                    int numberOfMonths = Integer.parseInt(inputText);
+                    int price = numberOfMonths * 500;
+                    priceOutput.setText(String.valueOf(price));
+                    scheduleNotification(numberOfMonths);
+                } else {
+                    priceOutput.setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        paybtn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makePayment();
+            }
+        });
+    }
+
+    private void makePayment() {
+        startPayment();
+    }
+
+    public void startPayment() {
+        Checkout checkout = new Checkout();
+        checkout.setKeyID("rzp_test_LXcVKRyEQxXK9F");
+
+        final AppCompatActivity activity = this;
+        try {
+            JSONObject options = new JSONObject();
+
+            options.put("name", "Bus Pass System");
+            options.put("description", "Reference No. #123456");
+            options.put("image", "https://s3.amazonaws.com/rzp-mobile/images/rzp.jpg");
+            options.put("theme.color", "#3399cc");
+            options.put("currency", "INR");
+            options.put("amount", "50000");
+            options.put("prefill.email", "gaurav.kumar@example.com");
+            options.put("prefill.contact", "8669835972");
+            JSONObject retryObj = new JSONObject();
+            retryObj.put("enabled", true);
+            retryObj.put("max_count", 4);
+            options.put("retry", retryObj);
+
+            checkout.open(activity, options);
+
+        } catch (Exception e) {
+            Log.e("TAG", "Error in starting Razorpay Checkout", e);
+        }
+    }
+
+    private void scheduleNotification(int numberOfMonths) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent notificationIntent = new Intent(this, Payment1.class);
+        notificationIntent.putExtra("message", "Your bus pass is due.");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, numberOfMonths);
+
+        long triggerTime = calendar.getTimeInMillis();
+        Log.d("NotificationScheduler", "Scheduling notification for " + numberOfMonths + " months from now.");
+        Log.d("NotificationScheduler", "Trigger time: " + triggerTime);
+        alarmManager.set(AlarmManager.RTC, triggerTime, pendingIntent);
+    }
+
+    @Override
+    public void onPaymentSuccess(String s) {
+        paytext1.setText("Successful Payment ID: " + s);
+    }
+
+    @Override
+    public void onPaymentError(int i, String s) {
+        paytext1.setText("Failed Payment cause is: " + s);
+    }
+
+    public void backtripactivity(View view) {
+        Intent intent = new Intent(this, TripRegistrationActivity.class);
+        startActivity(intent);
+    }
+
+    public void startPayActivity(View view) {
+        Intent intent = new Intent(this, Payment.class);
+        intent.putExtra("full_name", fullName);
+        intent.putExtra("date_of_birth", dateOfBirth);
+        intent.putExtra("phone_number", phoneNumber);
+        intent.putExtra("email", email);
+        intent.putExtra("address", address);
+        intent.putExtra("current_location", currentLocation);
+        intent.putExtra("destination", destinationLocation);
+
+        if (selectedImageUri != null) {
+            intent.putExtra("selected_image_uri", selectedImageUri.toString());
+        }
+
+        startActivity(intent);
+    }
+}
