@@ -27,3 +27,5 @@ Enjoy the convenience of a centralized hub where you can effortlessly create new
 Firebase-Powered Security:
 Your data's fortress is Firebase, ensuring that your sensitive information remains guarded against unauthorized access. JourneyPass prioritizes your privacy and security.
 ![WhatsApp Image 2023-11-10 at 17 29 13_2f770beb](https://github.com/Shantanu2007/Bus-Pass-Managment-App/assets/118951213/4e47418d-808e-45e7-9262-731da0f3ef8c)
+![Screenshot 2023-10-22 132724](https://github.com/Shantanu2007/Bus-Pass-Managment-App/assets/118951213/f05ae141-0680-4026-bdfa-3183d05aa713)
+
